@@ -10,14 +10,23 @@
   <!-- Sidebar -->
   <div id="sidebar">
     <h2>Bharas</h2>
-    <div class="channel" onclick="switchChannel('general')"># General</div>
-    <div class="channel" onclick="switchChannel('random')"># Random</div>
-    <div class="channel" onclick="switchChannel('gaming')"># Gaming</div>
+    <div id="channels">
+      <div class="channel active" onclick="switchChannel('general', this)"># General</div>
+      <div class="channel" onclick="switchChannel('random', this)"># Random</div>
+      <div class="channel" onclick="switchChannel('gaming', this)"># Gaming</div>
+    </div>
+    <button id="theme-toggle" onclick="toggleTheme()">🌙 Dark/Light</button>
   </div>
 
   <!-- Chat Section -->
   <div id="chat-section">
+    <div id="username-box">
+      <input id="username" placeholder="Enter username..." />
+      <button onclick="setUsername()">Set Name</button>
+    </div>
+
     <div id="chat"></div>
+
     <div id="input-area">
       <input id="msg" placeholder="Type a message..." />
       <button onclick="sendMessage()">Send</button>

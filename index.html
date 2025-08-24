@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bharas - Chat App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <h2>Bharas</h2>
+    <div class="channel" onclick="switchChannel('general')"># General</div>
+    <div class="channel" onclick="switchChannel('random')"># Random</div>
+    <div class="channel" onclick="switchChannel('gaming')"># Gaming</div>
+  </div>
+
+  <!-- Chat Section -->
+  <div id="chat-section">
+    <div id="chat"></div>
+    <div id="input-area">
+      <input id="msg" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+
+  <!-- Your custom script -->
+  <script src="script.js"></script>
+</body>
+</html>

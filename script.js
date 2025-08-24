@@ -1,4 +1,4 @@
-// ✅ Your Firebase Config
+// ✅ Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyCpZxMl8oqttPIuEg5wjITJTJ8-swtF0xc",
   authDomain: "sg-website-a3bf4.firebaseapp.com",
@@ -13,27 +13,56 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+const auth = firebase.auth();
 
-let currentChannel = "general"; // default channel
+let currentChannel = "general";
 let username = "Anonymous";
-const chatDiv = document.getElementById("chat");
 
-function setUsername() {
-  const name = document.getElementById("username").value;
-  if (name.trim() !== "") {
-    username = name;
-    alert("Welcome " + username + "!");
+// Show login page if not logged in
+auth.onAuthStateChanged(user => {
+  if (user) {
+    username = user.email.split("@")[0]; // simple username from email
+    document.getElementById("auth-page").style.display = "none";
+    document.getElementById("chat-page").style.display = "flex";
+    loadMessages();
+  } else {
+    document.getElementById("auth-page").style.display = "flex";
+    document.getElementById("chat-page").style.display = "none";
   }
+});
+
+// Register
+function register() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  auth.createUserWithEmailAndPassword(email, password)
+    .then(() => alert("Account created!"))
+    .catch(err => alert(err.message));
 }
 
+// Login
+function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  auth.signInWithEmailAndPassword(email, password)
+    .catch(err => alert(err.message));
+}
+
+// Logout
+function logout() {
+  auth.signOut();
+}
+
+// Channels
 function switchChannel(channel, element) {
   currentChannel = channel;
   document.querySelectorAll(".channel").forEach(c => c.classList.remove("active"));
   element.classList.add("active");
-  chatDiv.innerHTML = "";
+  document.getElementById("chat").innerHTML = "";
   loadMessages();
 }
 
+// Send message
 function sendMessage() {
   const msg = document.getElementById("msg").value;
   if (!msg) return;
@@ -43,32 +72,39 @@ function sendMessage() {
     time: new Date().toLocaleTimeString()
   });
   document.getElementById("msg").value = "";
+  db.ref("typing/" + currentChannel).remove();
 }
 
+// Load messages
 function loadMessages() {
   db.ref("channels/" + currentChannel).off();
-  db.ref("channels/" + currentChannel).on("child_added", function(snapshot) {
+  db.ref("channels/" + currentChannel).on("child_added", snapshot => {
     const data = snapshot.val();
     const div = document.createElement("div");
     div.className = "msg";
     div.innerHTML = `<b>${data.user}:</b> ${parseEmojis(data.text)}<div class="meta">${data.time}</div>`;
-    chatDiv.appendChild(div);
-    chatDiv.scrollTop = chatDiv.scrollHeight;
+    document.getElementById("chat").appendChild(div);
+    document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
+  });
+
+  // typing indicator
+  db.ref("typing/" + currentChannel).on("value", snapshot => {
+    const typingUser = snapshot.val();
+    if (typingUser && typingUser !== username) {
+      document.getElementById("typing-indicator").innerText = typingUser + " is typing...";
+    } else {
+      document.getElementById("typing-indicator").innerText = "";
+    }
   });
 }
 
-function toggleTheme() {
-  document.body.classList.toggle("dark");
-  document.body.classList.toggle("light");
+// Typing
+function showTyping() {
+  db.ref("typing/" + currentChannel).set(username);
+  setTimeout(() => db.ref("typing/" + currentChannel).remove(), 3000);
 }
 
-// Emoji Parser
+// Emoji parser
 function parseEmojis(text) {
-  return text.replace(":)", "😊")
-             .replace(":(", "😢")
-             .replace("<3", "❤️")
-             .replace(":D", "😁");
+  return text.replace(":)", "😊").replace(":(", "😢").replace("<3", "❤️").replace(":D", "😁");
 }
-
-loadMessages();
-document.body.classList.add("dark"); // default theme
